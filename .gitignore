@@ -1,0 +1,11 @@
+node_modules/
+.wrangler/
+.dev.vars
+.env*
+.backups/
+.DS_Store
+*.log
+
+# Las claves privadas deben guardarse fuera del proyecto.
+*.pem
+*.key

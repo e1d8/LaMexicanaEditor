@@ -1,0 +1,15 @@
+{
+  "allergens": {
+    "lacteo": { "label": "Lácteos", "icon": "assets/allergens/lacteo.svg" },
+    "gluten": { "label": "Gluten", "icon": "assets/allergens/gluten.svg" }
+  },
+  "sections": [
+    { "id": "bebidas", "name": "Bebidas", "items": [
+      { "name": "Agua", "price": "1.80€" },
+      { "name": "Vino", "description": "Consultar precio" }
+    ] },
+    { "id": "tacos", "name": "Tacos", "items": [
+      { "name": "Quesadilla", "description": "Con queso", "price": "4.00€", "allergens": ["lacteo", "gluten"] }
+    ] }
+  ]
+}

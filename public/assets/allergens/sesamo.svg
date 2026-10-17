@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 125" role="img" aria-labelledby="title">
+  <title id="title">Sésamo</title>
+  <circle cx="60" cy="62.5" r="54" fill="#7ca45b"/>
+  <g fill="#fff">
+    <ellipse cx="43" cy="43" rx="8" ry="15" transform="rotate(-32 43 43)"/>
+    <ellipse cx="70" cy="38" rx="8" ry="15" transform="rotate(24 70 38)"/>
+    <ellipse cx="79" cy="67" rx="8" ry="15" transform="rotate(49 79 67)"/>
+    <ellipse cx="52" cy="71" rx="8" ry="15" transform="rotate(-18 52 71)"/>
+    <ellipse cx="68" cy="91" rx="7" ry="13" transform="rotate(12 68 91)"/>
+  </g>
+</svg>

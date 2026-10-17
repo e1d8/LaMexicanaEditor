@@ -1,0 +1,14 @@
+{
+  "name": "la-mexicana-editor-api",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-16",
+  "workers_dev": true,
+  "vars": {
+    "EDITOR_URL": "https://fenikkel.github.io/LaMexicanaEditor/",
+    "GITHUB_OWNER": "e1d8",
+    "GITHUB_REPO": "LaMexicana",
+    "GITHUB_BRANCH": "main",
+    "GITHUB_APP_ID": "",
+    "GITHUB_INSTALLATION_ID": ""
+  }
+}

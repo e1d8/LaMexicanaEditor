@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 125" role="img" aria-labelledby="title">
+  <title id="title">Frutos con cáscara</title>
+  <circle cx="60" cy="62.5" r="54" fill="#a46e46"/>
+  <path d="M60 28c-18 0-31 14-31 34 0 21 13 35 31 35s31-14 31-35c0-20-13-34-31-34Z" fill="none" stroke="#fff" stroke-width="7"/>
+  <path d="M60 31v63M58 47c-12 3-16 11-15 23m19-12c11 3 15 11 14 23M58 76c-8 1-12 6-12 13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+</svg>

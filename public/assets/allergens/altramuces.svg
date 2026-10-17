@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 125" role="img" aria-labelledby="title">
+  <title id="title">Altramuces</title>
+  <circle cx="60" cy="62.5" r="54" fill="#8c73b8"/>
+  <path d="M36 91c11-30 29-45 51-58" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  <g fill="#fff">
+    <ellipse cx="47" cy="73" rx="9" ry="15" transform="rotate(-48 47 73)"/>
+    <ellipse cx="60" cy="58" rx="9" ry="15" transform="rotate(38 60 58)"/>
+    <ellipse cx="72" cy="46" rx="9" ry="15" transform="rotate(-48 72 46)"/>
+    <ellipse cx="36" cy="88" rx="9" ry="14" transform="rotate(36 36 88)"/>
+  </g>
+</svg>

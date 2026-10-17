@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#153d30">
+  <meta name="robots" content="noindex,nofollow">
+  <title>La Mexicana · Editor de carta</title>
+  <link rel="icon" href="assets/logo-la-mexicana.jpg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js" defer></script>
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Ir al contenido</a>
+  <aside class="sidebar">
+    <a class="brand" href="./"><img src="assets/logo-la-mexicana.jpg" alt="La Mexicana"><span>LA MEXICANA<small>Editor de carta</small></span></a>
+    <div class="sidebar-label">TU CARTA <span id="section-count">—</span></div>
+    <nav id="section-nav" aria-label="Secciones de la carta"></nav>
+    <button id="add-section" class="sidebar-add" disabled>＋ Añadir sección</button>
+    <div class="sidebar-bottom">
+      <button id="organize" class="sidebar-tool" disabled>↕ Organizar secciones</button>
+      <button id="allergens" class="sidebar-tool" disabled>◉ Gestionar alérgenos</button>
+      <div class="sidebar-note"><span class="live-dot"></span> Los cambios se publican al guardar</div>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span class="eyebrow">EL SABOR ESTÁ EN LOS DETALLES</span><div class="account"><span id="connection">Conectando…</span></div></header>
+    <main id="main">
+      <div class="page-heading"><div><p class="eyebrow green">GESTIÓN DE LA CARTA</p><h1>Tu carta, siempre al día<span>.</span></h1><p>Añade, organiza y edita. Nosotros nos encargamos del resto.</p></div><div class="heading-actions"><button id="preview" class="button secondary" disabled>Vista previa</button><button id="save" class="button primary" disabled>Guardar cambios <span aria-hidden="true">↗</span></button></div></div>
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <div id="loading" class="empty-panel"><span class="loader" aria-hidden="true"></span><h2>Preparando tu carta</h2><p>Estamos leyendo la información actual.</p></div>
+      <section id="error-panel" class="empty-panel" hidden><h2>No hemos podido abrir la carta</h2><p id="error-message"></p><button id="retry" class="button primary">Volver a intentar</button></section>
+      <div id="editor" hidden>
+        <div class="overview"><div><span class="overview-icon">≡</span><p><strong id="total-products">0</strong><span>productos en tu carta</span></p></div><div><span class="overview-icon">▤</span><p><strong id="total-sections">0</strong><span>secciones a tu gusto</span></p></div><div class="save-state"><span id="state-dot" class="state-dot"></span><p><strong id="save-state">Todo al día</strong><span id="save-hint">La carta está lista para tus clientes</span></p></div></div>
+        <div class="section-toolbar"><div><p class="eyebrow green" id="section-position"></p><div class="section-title-row"><h2 id="section-title"></h2><button id="rename-section" class="icon-button" aria-label="Editar nombre de sección">✎</button></div><p id="section-description"></p></div><button id="add-product" class="button primary">＋ Añadir producto</button></div>
+        <div class="list-toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar en esta sección…" aria-label="Buscar productos en la sección"></label><span id="visible-count"></span></div>
+        <div id="products" class="products"></div>
+        <div class="editor-footer"><span>Hecho para editar sin complicaciones.</span><button id="discard" class="text-button" disabled>Descartar cambios</button></div>
+      </div>
+      <noscript>Activa JavaScript para utilizar el editor de la carta.</noscript>
+    </main>
+  </div>
+  <dialog id="dialog" aria-labelledby="dialog-title"><div class="dialog-top"><p class="eyebrow green" id="dialog-kicker">TU CARTA</p><button id="close-dialog" class="icon-button" aria-label="Cerrar ventana">×</button></div><div id="dialog-body"></div></dialog>
+</body>
+</html>
