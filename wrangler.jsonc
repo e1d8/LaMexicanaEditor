@@ -4,11 +4,11 @@
   "compatibility_date": "2026-10-16",
   "workers_dev": true,
   "vars": {
-    "EDITOR_URL": "https://fenikkel.github.io/LaMexicanaEditor/",
+    "EDITOR_URL": "https://e1d8.github.io/LaMexicanaEditor/",
     "GITHUB_OWNER": "e1d8",
-    "GITHUB_REPO": "LaMexicana",
+    "GITHUB_REPO": "LAMEXICANA",
     "GITHUB_BRANCH": "main",
-    "GITHUB_APP_ID": "",
-    "GITHUB_INSTALLATION_ID": ""
+    "GITHUB_APP_ID": "5355231",
+    "GITHUB_INSTALLATION_ID": "172319674"
   }
 }
