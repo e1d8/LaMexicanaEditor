@@ -14,7 +14,8 @@ const put = (menu, fileVersion = version, headers = {}) => request("/api/menu", 
 function apiMock(overrides = {}) {
   const calls = [];
   let issues = 0;
-  let menu = structuredClone(fixture);
+  let successfulWrites = 0;
+  let menu = structuredClone(overrides.menu || fixture);
   let fileVersion = overrides.version || version;
   const clock = overrides.now || (() => Date.now());
   return {
@@ -37,7 +38,7 @@ function apiMock(overrides = {}) {
         const body = JSON.parse(options.body);
         if (body.sha !== fileVersion) return Response.json({}, { status: 409 });
         menu = JSON.parse(Buffer.from(body.content, "base64").toString("utf8"));
-        fileVersion = nextVersion;
+        fileVersion = (++successfulWrites + 10).toString(16).repeat(40);
         return Response.json({ content: { sha: fileVersion } });
       }
       throw new Error(`Unexpected network request: ${url}`);
@@ -141,13 +142,18 @@ test("anonymous save writes only menu.json, preserves Unicode and records the ap
   menu.sections[0].items.push({ name: "Piña y ñandú", price: "5.00€", custom: { preserved: true } });
   const response = await worker.fetch(put(menu), env);
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).version, nextVersion);
+  const result = await response.json();
+  assert.equal(result.version, nextVersion);
+  assert.equal(result.menu._editor.saveNumber, 1);
   const [write] = writes(mock);
   assert.equal(write.url, "https://api.github.com/repos/owner/menu/contents/menu.json");
   const body = JSON.parse(write.options.body);
   assert.equal(body.branch, "main"); assert.equal(body.sha, version);
-  assert.equal(body.message, "Actualizar carta desde el editor público");
-  assert.deepEqual(JSON.parse(Buffer.from(body.content, "base64").toString("utf8")), menu);
+  assert.match(body.message, /^#1 - Cambios del \d{1,2} de [A-ZÁÉÍÓÚ][a-záéíóú]+$/);
+  const stored = JSON.parse(Buffer.from(body.content, "base64").toString("utf8"));
+  assert.deepEqual(stored, result.menu);
+  delete stored._editor;
+  assert.deepEqual(stored, menu);
 });
 test("two visitors using the same initial version cannot overwrite one another", async () => {
   const mock = apiMock(); const worker = createWorker(mock);
@@ -203,4 +209,57 @@ test("GitHub write conflicts are returned without automatic overwrite", async ()
   const menu = structuredClone(fixture); menu.sections[0].items[0].name = "Changed";
   assert.equal((await worker.fetch(put(menu), env)).status, 409);
   assert.equal(writes(mock).length, 1);
+});
+
+
+test("save titles use Madrid dates and successive successful saves keep a single authoritative counter", async () => {
+  const mock = apiMock({ now: () => Date.parse("2026-10-17T22:30:00Z") }); const worker = createWorker(mock);
+  const edited = structuredClone(fixture); edited.sections[0].name = "First edit";
+  edited._editor = { saveNumber: 999, savedAt: "2000-01-01T00:00:00Z" };
+  const first = await (await worker.fetch(put(edited), env)).json();
+  assert.equal(first.menu._editor.saveNumber, 1);
+  assert.equal(first.menu._editor.savedAt, "2026-10-17T22:30:00.000Z");
+  assert.equal(JSON.parse(writes(mock)[0].options.body).message, "#1 - Cambios del 18 de Octubre");
+  // A client with old metadata must still be able to make the next real edit.
+  delete edited._editor; edited.sections[0].name = "Second edit";
+  const second = await (await worker.fetch(put(edited, first.version), env)).json();
+  assert.equal(second.menu._editor.saveNumber, 2);
+  assert.notEqual(second.version, first.version);
+  assert.equal(JSON.parse(writes(mock)[1].options.body).message, "#2 - Cambios del 18 de Octubre");
+  const unchanged = await (await worker.fetch(put(edited, second.version), env)).json();
+  assert.equal(unchanged.menu._editor.saveNumber, 2);
+  assert.equal(writes(mock).length, 2);
+});
+test("invalid saves, conflicts and failed writes do not consume save numbers", async () => {
+  const options = { writeStatus: 500 }; const mock = apiMock(options); const worker = createWorker(mock);
+  const edited = structuredClone(fixture); edited.sections[0].name = "A real edit";
+  assert.equal((await worker.fetch(put(edited), env)).status, 502);
+  assert.equal((await (await worker.fetch(request(), env)).json()).menu._editor, undefined);
+  options.writeStatus = 0;
+  const result = await (await worker.fetch(put(edited), env)).json();
+  assert.equal(result.menu._editor.saveNumber, 1);
+  assert.equal((await worker.fetch(put(edited), env)).status, 409);
+  assert.equal((await (await worker.fetch(request(), env)).json()).menu._editor.saveNumber, 1);
+});
+test("metadata-only changes and reordered object keys do not create a commit", async () => {
+  const menu = structuredClone(fixture);
+  menu._editor = { saveNumber: 4, savedAt: "2026-10-17T12:00:00.000Z" };
+  const mock = apiMock({ menu }); const worker = createWorker(mock);
+  const edited = { _editor: { saveNumber: 999 }, sections: menu.sections, allergens: menu.allergens };
+  const response = await worker.fetch(put(edited), env);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).menu._editor, menu._editor);
+  assert.equal(writes(mock).length, 0);
+});
+test("a concurrent rejected save does not create gaps in the committed sequence", async () => {
+  const mock = apiMock(); const worker = createWorker(mock);
+  const first = structuredClone(fixture); first.sections[0].name = "One";
+  const second = structuredClone(fixture); second.sections[0].name = "Two";
+  const responses = await Promise.all([worker.fetch(put(first), env), worker.fetch(put(second), env)]);
+  assert.deepEqual(responses.map((response) => response.status).sort(), [200, 409]);
+  const current = await (await worker.fetch(request(), env)).json();
+  assert.equal(current.menu._editor.saveNumber, 1);
+  current.menu.sections[0].name = "Next real edit";
+  const next = await (await worker.fetch(put(current.menu, current.version), env)).json();
+  assert.equal(next.menu._editor.saveNumber, 2);
 });

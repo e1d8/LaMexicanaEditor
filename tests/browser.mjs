@@ -60,8 +60,15 @@ try {
     window.editorRequests = [];
     const originalFetch = window.fetch.bind(window);
     window.fetch = async (url, options = {}) => {
-      window.editorRequests.push({ url: String(url), method: options.method || "GET", authorization: new Headers(options.headers).get("Authorization") });
+      window.editorRequests.push({ url: String(url), method: options.method || "GET", authorization: new Headers(options.headers).get("Authorization"), saveNumber: options.body ? JSON.parse(options.body).menu?._editor?.saveNumber : undefined });
       if (window.simulateSaveFailure && options.method === "PUT") return new Response(JSON.stringify({ message: "Servicio de guardado temporalmente no disponible." }), { status: 503, headers: { "Content-Type": "application/json" } });
+      if (window.simulateRemoteSave && options.method === "PUT") {
+        const body = JSON.parse(options.body);
+        body.menu._editor = { saveNumber: 7, savedAt: "2026-10-17T12:00:00.000Z" };
+        const response = await originalFetch(url, { ...options, body: JSON.stringify(body) });
+        const result = await response.json();
+        return Response.json({ ...result, ...(response.ok ? { menu: body.menu } : {}) }, { status: response.status });
+      }
       return originalFetch(url, options);
     };
     try { sessionStorage.setItem('mexicana-session:', 'legacy-session-to-remove'); } catch {}
@@ -186,12 +193,15 @@ try {
   assert.ok(await evaluate("!document.querySelector('#dialog .form-error a')"));
   assert.ok(await evaluate("Object.keys(localStorage).some(key => key.startsWith('mexicana-draft:'))"));
   assert.deepEqual(JSON.parse(await readFile(menuPath)), initial);
-  await evaluate("window.simulateSaveFailure = false");
+  await evaluate("window.simulateSaveFailure = false; window.simulateRemoteSave = true");
   await dialogButton("Sí, guardar cambios");
   await waitFor("!document.querySelector('#dialog').open && document.querySelector('#notice').textContent.includes('guardados')");
   const saved = JSON.parse(await readFile(menuPath));
   assert.ok(saved.sections.some((section) => section.items.some((item) => item.name === "Taco de prueba" && item.price === "9.30€")));
+  assert.equal(saved._editor.saveNumber, 7);
+  await evaluate("window.simulateRemoteSave = false");
   assert.equal(await evaluate("document.querySelector('#save').disabled"), true);
+  console.log("PASS: returned save metadata synchronized without leaving unsaved changes");
   console.log("PASS: real local save, updated file, clean state");
 
   await click("#add-product");
@@ -201,6 +211,7 @@ try {
   await waitFor("!document.querySelector('#dialog .form-error').hidden && document.querySelector('#dialog .form-error').textContent.includes('ha cambiado')");
   assert.ok(!(await readFile(menuPath, "utf8")).includes("Conflicto conservado"));
   assert.ok(await evaluate("document.querySelector('#total-products').textContent === '" + (expectedCount + 2) + "'"));
+  assert.equal(await evaluate("editorRequests.filter(request => request.method === 'PUT').at(-1).saveNumber"), 7);
   console.log("PASS: conflicting external changes are never overwritten; edits retained");
   assert.ok(await evaluate("editorRequests.every(request => !request.authorization && !request.url.includes('/api/session') && !request.url.includes('/auth/'))"));
   console.log("PASS: anonymous browser requests, no login UI, service errors preserve drafts and retry succeeds");

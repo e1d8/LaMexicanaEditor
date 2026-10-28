@@ -429,6 +429,7 @@ function reviewSave() {
     try {
       const result = await request("/api/menu", { method: "PUT", body: JSON.stringify({ menu: state.menu, version: state.version }) });
       state.version = result.version;
+      if (result.menu) state.menu = result.menu;
       state.original = clone(state.menu);
       state.dirty = false;
       rememberDraft();

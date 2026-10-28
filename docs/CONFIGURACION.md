@@ -423,7 +423,9 @@ Haz esta comprobación cuando quieras publicar una modificación real de la cart
 4. Pulsa **Guardar cambios**, revisa el resumen y confirma **Sí, guardar cambios**.
 5. El editor debe confirmar que se ha guardado en GitHub.
 6. Abre el repositorio de la carta. Debe aparecer un nuevo cambio con el mensaje
-   **Actualizar carta desde el editor público**.
+   **#1 - Cambios del 17 de Octubre**, con el número y la fecha reales del guardado.
+   Para que también sea el título de la ejecución en Actions, sigue el apartado
+   «Activar los títulos numerados de los guardados» de esta guía.
 7. Espera a que termine la publicación de la carta en la pestaña **Actions**
    de su repositorio. Puede tardar unos minutos. Abre o recarga la carta pública
    y comprueba el dato.
@@ -433,6 +435,48 @@ prueba temporal, vuelve a editar ese dato y guarda su valor original.
 
 Esta guía no ha publicado cambios por ti. Las pruebas automáticas del proyecto
 usan archivos temporales y no modifican la carta real.
+
+### Activar los títulos numerados de los guardados
+
+Este cambio afecta a **la publicación de la carta**, no al workflow «Publicar
+editor en GitHub Pages» del editor. El siguiente guardado con cambios empezará
+con `#1` si la carta todavía no tiene contador. Los títulos anteriores no cambian.
+
+1. En GitHub, abre el repositorio **LaMexicana**, entra en **Settings → Pages**
+   y elige **GitHub Actions** en **Build and deployment → Source**. A partir de
+   ese momento se usará el workflow incluido en el proyecto de la carta.
+2. En GitHub Desktop selecciona **LaMexicana** y sube el archivo nuevo
+   `.github/workflows/pages.yml` y las instrucciones actualizadas: escribe un
+   resumen, pulsa **Commit to main** y **Push origin**. Mantén la rama `main`.
+   El workflow se llama **Publicar carta en GitHub Pages** y empaqueta los archivos
+   públicos de la carta. Espera a que su primera ejecución termine en verde.
+3. En GitHub Desktop selecciona **LaMexicanaEditor** y sube también sus cambios,
+   incluido el archivo nuevo `menu-save-history.mjs`. Espera a que se publique
+   la interfaz del editor.
+4. En el terminal, publica el código actualizado de la API:
+
+   ```sh
+   cd "/Users/Fenikkel/Documents/Github/LaMexicanaEditor"
+   npx --yes wrangler deploy
+   ```
+
+5. Abre o recarga el editor, cambia algún dato que quieras publicar y guarda.
+   En **LaMexicana → Actions → Publicar carta en GitHub Pages** aparecerá una
+   ejecución como **#1 - Cambios del 17 de Octubre**, con la fecha actual de Madrid.
+
+La clave privada y los identificadores de la App siguen siendo los que ya
+configuraste. No hay que cambiarlos para esta actualización.
+
+**Comprobación:** guardar un segundo cambio real muestra `#2`. Abrir el editor,
+enviar los mismos datos o repetir una publicación no cambia el número. El
+contador y la fecha UTC se guardan en el campo interno `_editor` de `menu.json`;
+la carta pública lo ignora. No lo borres ni lo modifiques manualmente.
+
+Una publicación iniciada con **Run workflow** se llama «Publicación manual de la
+carta». Una modificación de código utiliza su mensaje de commit y no suma un
+guardado de carta. Si falla una publicación, el guardado ya aceptado sigue teniendo
+su número. Repetir esa ejecución publica la misma versión; para publicar la versión
+actual de `main`, utiliza **Run workflow**.
 
 ## 4. Uso diario y solución de problemas
 

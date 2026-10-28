@@ -1,4 +1,5 @@
 import { validateMenu, ICON_PATTERN } from "./public/menu-model.js";
+import { prepareMenuSave, readSaveHistory } from "./menu-save-history.mjs";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -120,6 +121,7 @@ export function createWorker({ fetchImpl = (...args) => fetch(...args), now = ()
     catch { throw problem(422, "La carta actual no se puede leer. No se ha modificado el archivo."); }
     const errors = validateMenu(menu);
     if (errors.length) throw problem(422, "La carta actual contiene datos que necesitan revisión.", errors);
+    readSaveHistory(menu);
     return { menu, version: file.sha };
   }
   async function icons(env, config) {
@@ -177,10 +179,11 @@ export function createWorker({ fetchImpl = (...args) => fetch(...args), now = ()
       for (const definition of Object.values(body.menu.allergens)) {
         if (!availableIcons.includes(definition.icon)) throw problem(422, `No existe el icono de «${definition.label}».`);
       }
-      if (JSON.stringify(current.menu) === JSON.stringify(body.menu)) return Response.json({ version: current.version, message: "La carta ya estaba actualizada." });
-      const content = base64(encoder.encode(JSON.stringify(body.menu, null, 2) + "\n"));
-      const result = await github(`${config.repo}/contents/menu.json`, env, { method: "PUT", body: JSON.stringify({ message: "Actualizar carta desde el editor público", content, sha: current.version, branch: env.GITHUB_BRANCH }) });
-      return Response.json({ version: result.content.sha, message: "Cambios guardados en GitHub. La carta pública puede tardar unos minutos en actualizarse." });
+      const save = prepareMenuSave(current.menu, body.menu, now());
+      if (!save.changed) return Response.json({ version: current.version, menu: current.menu, message: "La carta ya estaba actualizada." });
+      const content = base64(encoder.encode(JSON.stringify(save.menu, null, 2) + "\n"));
+      const result = await github(`${config.repo}/contents/menu.json`, env, { method: "PUT", body: JSON.stringify({ message: save.title, content, sha: current.version, branch: env.GITHUB_BRANCH }) });
+      return Response.json({ version: result.content.sha, menu: save.menu, message: `Cambios guardados en GitHub. ${save.title}. La carta pública puede tardar unos minutos en actualizarse.` });
     }
     throw problem(404, "Ruta no encontrada.");
   }

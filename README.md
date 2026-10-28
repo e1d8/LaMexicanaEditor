@@ -53,6 +53,24 @@ El historial de GitHub permite recuperar versiones anteriores. CORS limita
 los orígenes que pueden usar la API desde un navegador; no es un control de
 identidad ni convierte este editor público en privado.
 
+## Títulos numerados de los guardados
+
+Los guardados por Internet crean commits como `#1 - Cambios del 17 de Octubre`.
+El número aumenta solo cuando GitHub acepta una modificación real de la carta.
+La fecha se calcula en Madrid; los reintentos, conflictos, aperturas y envíos
+sin cambios no suman. El primer guardado tras activar esta versión empieza en 1,
+sin renombrar el historial anterior.
+
+El contador y la fecha UTC se conservan en `_editor` dentro de `menu.json`, en el
+mismo commit que los productos. La API ignora los valores de ese campo que envíe
+el navegador y utiliza siempre los del archivo actual. No hay que editarlos a
+mano. El guardado local no aumenta este contador de publicaciones por Internet.
+
+Para ver esos títulos en **Actions del repositorio de la carta**, activa el
+workflow de publicación incluido en **LaMexicana** siguiendo los pasos de
+[actualización de la configuración](docs/CONFIGURACION.md#activar-los-títulos-numerados-de-los-guardados).
+El workflow del repositorio del editor conserva su nombre actual.
+
 ## Pruebas y detalles técnicos
 
 Desde esta carpeta, con Node.js 22 o superior:
@@ -82,7 +100,9 @@ Las capturas quedan en `/tmp/lamexicana-editor-desktop.png` y
 - `.github/workflows/pages.yml` publica únicamente `public/`.
 
 La API ofrece `GET /api/menu` → `{ menu, version, icons, mode }` y
-`PUT /api/menu` con `{ menu, version }` → `{ version, message }`.
+`PUT /api/menu` con `{ menu, version }` → `{ version, menu, message }`. La
+respuesta de guardado incluye la carta con su contador actualizado para sincronizar
+la siguiente edición; el modo local conserva la respuesta anterior sin `menu`.
 `mode` es `local` o `github`. No hay rutas de login ni de sesión. Se validan los
 datos en ambos extremos y se limita el cuerpo de las peticiones a 1 MB.
 Los errores de configuración y conectividad no requieren identificar al visitante.
